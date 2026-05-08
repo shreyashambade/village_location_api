@@ -3,3 +3,8 @@ node_modules/
 dist/
 coverage/
 claudefiles/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+prd/
+prd/apikeys.txt
+data_cleaning/raw_work/
