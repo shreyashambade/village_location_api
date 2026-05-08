@@ -35,12 +35,21 @@ A production-style hierarchical location API for Indian states, districts, subdi
 village_location_api/
 │
 ├── backend/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── routes/
+│   ├── utils/
+│   ├── db/
+│   ├── app.js
+│   └── package.json
+│
 ├── data_cleaning/
 │   ├── raw/
 │   ├── cleaned/
 │   └── clean_data.py
 │
 ├── prd/
+│
 ├── .env.example
 ├── .gitignore
 └── README.md
