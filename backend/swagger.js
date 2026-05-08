@@ -16,7 +16,9 @@ openapi: "3.0.0",
 
     servers: [
         {
-            url: "http://localhost:3000",
+             url: process.env.NODE_ENV === "production"
+            ? "https://village-location-api.onrender.com"
+            : "http://localhost:3000",
         },
     ],
 
