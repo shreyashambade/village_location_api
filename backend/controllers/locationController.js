@@ -22,18 +22,37 @@ function formatVillageName(rawName) {
 }
 
 // helper function 2 : standard succes response
-function sendResponse(res, req, data, startTime, cached = false) {
+function sendResponse(
+    res, 
+    req, 
+    data, 
+    startTime, 
+    cached = false, 
+    extraMeta= {}
+) {
     const responseTime = Date.now() - startTime;
-
 
     res.json({
         success :true,
-        count : data.length,
+        count : Array.isArray(data)
+            ? data.length
+            : data
+            ? 1
+            : 0,
         data : data,
         meta : {
             requestId : req.requestId || null,
-            responseTime : responseTime,
-            cached : cached
+            responseTime,
+            cached,
+            rateLimit : {
+                remaining : req.rateLimit?.remaining ?? 5000,
+                limit : req.rateLimit?.limit ?? 5000,
+                reset : req.rateLimit?.resetTime ? new Date(
+                    req.rateLimit.resetTime
+                ).toISOString()
+                : null
+            },
+            ...extraMeta,
         }
     });
 }
@@ -189,18 +208,17 @@ exports.getVillages = async (req, res) => {
         
         if (cached) {
             const data = typeof cached === "string" ? JSON.parse(cached) : cached;
-            const responseTime = Date.now() - startTime;
-            return res.json({
-                success: true,
-                count: data.length,
-                data: data,
-                meta: { 
-                    requestId: req.requestId || null,
-                    responseTime, 
-                    page, 
-                    limit, 
-                    cached: true }
-            });
+            return sendResponse(
+                res, 
+                req, 
+                data, 
+                startTime, 
+                true,
+                {
+                    page,
+                    limit,
+                }
+            );
         }
 
 
@@ -217,18 +235,9 @@ exports.getVillages = async (req, res) => {
 
         await setCache(cacheKey, formatted, TTL.villages);
 
-        const responseTime = Date.now() - startTime;
-        res.json({
-            success : true,
-            count : formatted.length,
-            data : formatted,
-            meta : {
-                requestId: req.requestId || null,
-                responseTime,
-                page,
-                limit,
-                cached : false
-            }
+        sendResponse(res, req, formatted, startTime, false, {
+            page,
+            limit,
         });
 
     } catch (err) {
